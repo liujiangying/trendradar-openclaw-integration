@@ -1,0 +1,170 @@
+"""
+推送模块
+
+负责将消息推送到企业微信等渠道
+"""
+
+import logging
+import subprocess
+from typing import Any, Dict, Optional
+
+logger = logging.getLogger(__name__)
+
+
+class Pusher:
+    """消息推送器"""
+    
+    def __init__(self, config: Dict[str, Any]):
+        """
+        初始化推送器
+        
+        Args:
+            config: 配置字典
+        """
+        self.config = config
+        self.push_config = config.get('push', {})
+        
+        self.enabled = self.push_config.get('enabled', True)
+        self.channel = self.push_config.get('channel', 'wecom')
+        self.target = self.push_config.get('target', '')
+        
+        logger.info(f"初始化推送器: channel={self.channel}, target={self.target}")
+    
+    def push(self, message: str, dry_run: bool = False) -> bool:
+        """
+        推送消息
+        
+        Args:
+            message: 要推送的消息
+            dry_run: 是否为测试模式（不实际推送，只打印）
+            
+        Returns:
+            是否推送成功
+        """
+        if not self.enabled:
+            logger.info("推送已禁用，跳过")
+            return True
+        
+        if not self.target:
+            logger.error("未配置推送目标（target）")
+            return False
+        
+        if dry_run:
+            logger.info("===== 测试模式：消息预览 =====")
+            print(message)
+            logger.info("===== 测试模式结束 =====")
+            return True
+        
+        logger.info(f"开始推送消息到 {self.channel}: {self.target}")
+        
+        try:
+            if self.channel == 'wecom':
+                return self._push_to_wecom(message)
+            elif self.channel == 'telegram':
+                return self._push_to_telegram(message)
+            else:
+                logger.error(f"不支持的推送渠道: {self.channel}")
+                return False
+        except Exception as e:
+            logger.error(f"推送失败: {e}", exc_info=True)
+            return False
+    
+    def _push_to_wecom(self, message: str) -> bool:
+        """
+        推送到企业微信
+        
+        Args:
+            message: 消息内容
+            
+        Returns:
+            是否推送成功
+        """
+        logger.info("推送到企业微信")
+        
+        try:
+            # 使用 openclaw message send 命令
+            cmd = [
+                'openclaw', 'message', 'send',
+                '--channel', 'openclaw-wecom-bot',
+                '--target', self.target,
+                '--message', message
+            ]
+            
+            logger.debug(f"执行命令: {' '.join(cmd)}")
+            
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+            
+            if result.returncode == 0:
+                logger.info("企业微信推送成功")
+                return True
+            else:
+                logger.error(f"企业微信推送失败: {result.stderr}")
+                return False
+                
+        except subprocess.TimeoutExpired:
+            logger.error("企业微信推送超时")
+            return False
+        except FileNotFoundError:
+            logger.error("未找到 openclaw 命令，请检查安装")
+            return False
+        except Exception as e:
+            logger.error(f"企业微信推送异常: {e}", exc_info=True)
+            return False
+    
+    def _push_to_telegram(self, message: str) -> bool:
+        """
+        推送到 Telegram
+        
+        Args:
+            message: 消息内容
+            
+        Returns:
+            是否推送成功
+        """
+        logger.info("推送到 Telegram")
+        
+        try:
+            cmd = [
+                'openclaw', 'message', 'send',
+                '--channel', 'telegram',
+                '--target', self.target,
+                '--message', message
+            ]
+            
+            logger.debug(f"执行命令: {' '.join(cmd)}")
+            
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+            
+            if result.returncode == 0:
+                logger.info("Telegram 推送成功")
+                return True
+            else:
+                logger.error(f"Telegram 推送失败: {result.stderr}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Telegram 推送异常: {e}", exc_info=True)
+            return False
+    
+    def test_connection(self) -> bool:
+        """
+        测试推送连接
+        
+        Returns:
+            连接是否正常
+        """
+        logger.info("测试推送连接")
+        
+        test_message = "🔔 TrendRadar 推送测试\n\n这是一条测试消息，如果收到说明配置正确。"
+        
+        return self.push(test_message)

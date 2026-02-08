@@ -1,0 +1,133 @@
+# ═══════════════════════════════════════════════════════════════
+#         TrendRadar + OpenClaw 集成配置
+# ═══════════════════════════════════════════════════════════════
+
+# TrendRadar 配置
+trendradar:
+  # TrendRadar 项目根目录
+  root_path: "/root/.openclaw/workspace/trendradar-integration/TrendRadar"
+  
+  # MCP 模式（stdio 或 http）
+  mcp_mode: "stdio"
+
+# 数据源配置
+sources:
+  # 热榜平台列表（留空表示使用 TrendRadar 配置的所有平台）
+  platforms:
+    - "zhihu"       # 知乎
+    - "weibo"       # 微博
+    - "toutiao"     # 今日头条
+    - "baidu"       # 百度热搜
+    - "douyin"      # 抖音
+  
+  # RSS 订阅源列表（留空表示使用 TrendRadar 配置的所有源）
+  rss_feeds:
+    - "hacker-news"
+    - "ruanyifeng"
+
+# 关键词配置
+keywords:
+  # 是否启用关键词过滤
+  enabled: true
+  
+  # 是否在推送中显示热门话题
+  show_trending: true
+  
+  # 关键词分组
+  groups:
+    - name: "技术与 AI"
+      words:
+        - "AI"
+        - "人工智能"
+        - "ChatGPT"
+        - "大模型"
+        - "机器学习"
+        - "深度学习"
+        - "算法"
+        - "开源"
+    
+    - name: "数据与质量"
+      words:
+        - "数据"
+        - "数据质量"
+        - "质量管理"
+        - "质量监控"
+        - "数据治理"
+        - "数据分析"
+    
+    - name: "腾讯相关"
+      words:
+        - "腾讯"
+        - "微信"
+        - "QQ"
+        - "企业微信"
+  
+  # 最小出现频率（用于热门话题统计）
+  min_frequency: 2
+
+# 推送配置
+push:
+  # 是否启用推送
+  enabled: true
+  
+  # 推送渠道（wecom: 企业微信, telegram: Telegram）
+  channel: "wecom"
+  
+  # 推送目标
+  # - 企业微信: 群聊名称或群聊 ID
+  # - Telegram: 频道 ID 或用户名
+  target: "your-group-name-or-id"
+  
+  # 推送时间配置
+  schedule:
+    # 定时推送时间点（24小时制）
+    times:
+      - "09:00"  # 早上 9 点
+      - "12:00"  # 中午 12 点
+      - "18:00"  # 下午 6 点
+    
+    # 时区
+    timezone: "Asia/Shanghai"
+  
+  # 消息格式配置
+  format:
+    # 每个关键词组最多显示条数（0 = 不限制）
+    max_items_per_keyword: 5
+    
+    # 是否显示排名
+    show_ranking: true
+    
+    # 是否显示平台名称
+    show_platform: true
+    
+    # 是否显示链接
+    show_url: false
+
+# 过滤配置
+filters:
+  # 排名阈值（只推送排名 <= threshold 的新闻，0 = 不限制）
+  rank_threshold: 20
+  
+  # 最小热度（0 = 不限制）
+  min_hot_score: 0
+  
+  # 排除关键词（包含这些词的新闻将被过滤掉）
+  exclude_keywords:
+    - "广告"
+    - "营销号"
+    - "震惊"
+    - "不看后悔"
+
+# 日志配置
+logging:
+  # 日志级别（DEBUG, INFO, WARNING, ERROR）
+  level: "INFO"
+  
+  # 日志文件路径
+  file: "/root/.openclaw/workspace/trendradar-integration/trendradar.log"
+  
+  # 是否保留历史日志
+  keep_history: true
+  
+  # 日志保留天数
+  retention_days: 7
