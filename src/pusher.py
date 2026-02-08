@@ -60,6 +60,10 @@ class Pusher:
         try:
             if self.channel == 'wecom':
                 return self._push_to_wecom(message)
+            elif self.channel == 'wechat':
+                return self._push_to_wechat(message)
+            elif self.channel == 'feishu':
+                return self._push_to_feishu(message)
             elif self.channel == 'telegram':
                 return self._push_to_telegram(message)
             else:
@@ -154,6 +158,93 @@ class Pusher:
                 
         except Exception as e:
             logger.error(f"Telegram 推送异常: {e}", exc_info=True)
+            return False
+    
+    def _push_to_wechat(self, message: str) -> bool:
+        """
+        推送到微信（个人微信）
+        
+        使用 OpenClaw 的 imessage 或其他微信渠道
+        
+        Args:
+            message: 消息内容
+            
+        Returns:
+            是否推送成功
+        """
+        logger.info("推送到微信")
+        
+        try:
+            # 如果配置了微信 bot/webhook
+            # 可以通过 OpenClaw 的 message tool 推送
+            cmd = [
+                'openclaw', 'message', 'send',
+                '--channel', 'wechat',  # 需要配置微信渠道
+                '--target', self.target,
+                '--message', message
+            ]
+            
+            logger.debug(f"执行命令: {' '.join(cmd)}")
+            
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+            
+            if result.returncode == 0:
+                logger.info("微信推送成功")
+                return True
+            else:
+                logger.error(f"微信推送失败: {result.stderr}")
+                logger.warning("微信推送需要先配置微信渠道，详见文档")
+                return False
+                
+        except Exception as e:
+            logger.error(f"微信推送异常: {e}", exc_info=True)
+            return False
+    
+    def _push_to_feishu(self, message: str) -> bool:
+        """
+        推送到飞书
+        
+        Args:
+            message: 消息内容
+            
+        Returns:
+            是否推送成功
+        """
+        logger.info("推送到飞书")
+        
+        try:
+            # 使用 OpenClaw message send 推送到飞书
+            cmd = [
+                'openclaw', 'message', 'send',
+                '--channel', 'feishu',  # 需要配置飞书渠道
+                '--target', self.target,
+                '--message', message
+            ]
+            
+            logger.debug(f"执行命令: {' '.join(cmd)}")
+            
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+            
+            if result.returncode == 0:
+                logger.info("飞书推送成功")
+                return True
+            else:
+                logger.error(f"飞书推送失败: {result.stderr}")
+                logger.warning("飞书推送需要先配置飞书渠道，详见文档")
+                return False
+                
+        except Exception as e:
+            logger.error(f"飞书推送异常: {e}", exc_info=True)
             return False
     
     def test_connection(self) -> bool:

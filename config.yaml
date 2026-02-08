@@ -70,13 +70,28 @@ push:
   # 是否启用推送
   enabled: true
   
-  # 推送渠道（wecom: 企业微信, telegram: Telegram）
+  # 推送渠道
+  # 可选值: wecom (企业微信), wechat (微信), feishu (飞书), telegram (Telegram)
   channel: "wecom"
   
   # 推送目标
   # - 企业微信: 群聊名称或群聊 ID
+  # - 微信: 好友/群聊名称或 ID（需要配置微信 bot）
+  # - 飞书: 群聊名称或群聊 ID（需要配置飞书 bot）
   # - Telegram: 频道 ID 或用户名
-  target: "your-group-name-or-id"
+  target: "wokSFfCgAApeKUk5EX57lhqd0gebeqmQ"  # 已配置为你的企业微信群
+  
+  # 多渠道推送配置（可选）
+  # 如果需要同时推送到多个渠道，在这里配置
+  multi_channel:
+    enabled: false  # 设置为 true 启用多渠道推送
+    channels:
+      - channel: "wecom"
+        target: "wokSFfCgAApeKUk5EX57lhqd0gebeqmQ"
+      # - channel: "wechat"
+      #   target: "your-wechat-contact"
+      # - channel: "feishu"
+      #   target: "your-feishu-group"
   
   # 推送时间配置
   schedule:
