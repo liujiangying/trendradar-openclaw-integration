@@ -685,7 +685,7 @@ grep "推送成功\|推送失败" trendradar.log
 
 ---
 
-**📧 联系方式**：cassieyliu (腾讯数据质量平台)
+**📧 联系方式**：cassieyliu 
 
 **🔗 相关链接**：
 - [TrendRadar GitHub](https://github.com/sansan0/TrendRadar)
